@@ -74,6 +74,29 @@ interface ProductFactory {
 }
 ```
 
+### Abstract Factory
+
+The Abstract Factory pattern provides an interface for creating families of related or dependent objects without specifying their concrete classes.
+
+```kotlin
+// Example of Abstract Factory in Kotlin
+interface AbstractFactory {
+    fun createProductA(): ProductA
+    fun createProductB(): ProductB
+}
+```
+
+### Prototype
+
+The Prototype pattern creates new objects by copying an existing object, known as the prototype.
+
+```kotlin
+// Example of Prototype in Kotlin
+interface Prototype {
+    fun clone(): Prototype
+}
+```
+
 ## Structural Patterns
 
 ### Adapter
@@ -118,6 +141,106 @@ class SubsystemFacade {
     fun operation() {
         subsystem1.operation()
         subsystem2.operation()
+    }
+}
+```
+
+### Composite
+
+The Composite pattern lets clients treat individual objects and compositions of objects uniformly.
+
+```kotlin
+// Example of Composite in Kotlin
+interface Component {
+    fun operation()
+}
+
+class Leaf : Component {
+    override fun operation() {
+        println("Leaf operation")
+    }
+}
+
+class Composite : Component {
+    private val children: MutableList<Component> = mutableListOf()
+
+    fun add(component: Component) {
+        children.add(component)
+    }
+
+    override fun operation() {
+        for (child in children) {
+            child.operation()
+        }
+    }
+}
+```
+
+### Bridge
+
+The Bridge pattern separates abstraction from implementation so that the two can vary independently.
+
+```kotlin
+// Example of Bridge in Kotlin
+interface Implementor {
+    fun operationImp()
+}
+
+class ConcreteImplementor : Implementor {
+    override fun operationImp() {
+        println("Concrete Implementor operation")
+    }
+}
+
+class Abstraction(private val implementor: Implementor) {
+    fun operation() {
+        implementor.operationImp()
+    }
+}
+```
+
+### Flyweight
+
+The Flyweight pattern minimizes memory usage or computational expenses by sharing as much as possible with related objects.
+
+```kotlin
+// Example of Flyweight in Kotlin
+class Flyweight(private val intrinsicState: String) {
+    fun operation(extrinsicState: String) {
+        println("Flyweight: Intrinsic [$intrinsicState], Extrinsic [$extrinsicState]")
+    }
+}
+
+class FlyweightFactory {
+    private val flyweights: MutableMap<String, Flyweight> = mutableMapOf()
+
+    fun getFlyweight(key: String): Flyweight {
+        return flyweights.computeIfAbsent(key) { Flyweight(it) }
+    }
+}
+```
+
+### Proxy
+
+The Proxy pattern provides a surrogate or placeholder for another object to control access to it.
+
+```kotlin
+// Example of Proxy in Kotlin
+interface Subject {
+    fun request()
+}
+
+class RealSubject : Subject {
+    override fun request() {
+        println("RealSubject: Handling request")
+    }
+}
+
+class Proxy(private val realSubject: RealSubject) : Subject {
+    override fun request() {
+        println("Proxy: Pre-processing request")
+        realSubject.request()
+        println("Proxy: Post-processing request")
     }
 }
 ```
@@ -190,5 +313,211 @@ The Visitor pattern represents an operation to be performed on the elements of a
 interface Visitor {
     fun visitElementA(elementA: ElementA)
     fun visitElementB(elementB: ElementB)
+}
+```
+
+### Chain of Responsibility
+
+The Chain of Responsibility pattern passes requests along a chain of handlers, each handling the request or passing it along the chain.
+
+```kotlin
+// Example of Chain of Responsibility in Kotlin
+abstract class Handler {
+    var successor: Handler? = null
+
+    abstract fun handleRequest(request: String)
+}
+
+class ConcreteHandlerA : Handler() {
+    override fun handleRequest(request: String) {
+        if (request == "A") {
+            println("ConcreteHandlerA handling request A")
+        } else {
+            successor?.handleRequest(request)
+        }
+    }
+}
+
+class ConcreteHandlerB : Handler() {
+    override fun handleRequest(request: String) {
+        if (request == "B") {
+            println("ConcreteHandlerB handling request B")
+        } else {
+            successor?.handleRequest(request)
+        }
+    }
+}
+```
+
+### Command
+
+The Command pattern encapsulates a request as an object, allowing for parameterization of clients with different requests, queuing of requests, and logging of the requests.
+
+```kotlin
+// Example of Command in Kotlin
+interface Command {
+    fun execute()
+}
+
+class ConcreteCommand(private val receiver: Receiver) : Command {
+    override fun execute() {
+        receiver.action()
+    }
+}
+
+class Receiver {
+    fun action() {
+        println("Receiver performing action")
+    }
+}
+
+class Invoker {
+    private var command: Command? = null
+
+    fun setCommand(command: Command) {
+        this.command = command
+    }
+
+    fun executeCommand() {
+        command?.execute()
+    }
+}
+```
+
+### Iterator
+
+The Iterator pattern provides a way to access elements of an aggregate object sequentially without exposing its underlying representation.
+
+```kotlin
+// Example of Iterator in Kotlin
+interface Iterator {
+    fun hasNext(): Boolean
+    fun next(): String
+}
+
+class ConcreteIterator(private val collection: ConcreteAggregate) : Iterator {
+    private var index = 0
+
+    override fun hasNext(): Boolean {
+        return index < collection.size()
+    }
+
+    override fun next(): String {
+        return if (hasNext()) {
+            val element = collection.getElement(index)
+            index++
+            element
+        } else {
+            throw NoSuchElementException()
+        }
+    }
+}
+
+class ConcreteAggregate {
+    private val elements: MutableList<String> = mutableListOf()
+
+    fun addElement(element: String) {
+        elements.add(element)
+    }
+
+    fun createIterator(): Iterator {
+        return ConcreteIterator(this)
+    }
+
+    fun size(): Int {
+        return elements.size
+    }
+
+    fun getElement(index: Int): String {
+        return elements[index]
+    }
+}
+```
+
+### Mediator
+
+The Mediator pattern defines an object that centralizes communication between objects in a system.
+
+```kotlin
+// Example of Mediator in Kotlin
+interface Mediator {
+    fun notify(sender: Colleague, event: String)
+}
+
+class ConcreteMediator : Mediator {
+    private lateinit var colleagueA: ColleagueA
+    private lateinit var colleagueB: ColleagueB
+
+    fun setColleagueA(colleagueA: ColleagueA) {
+        this.colleagueA = colleagueA
+    }
+
+    fun setColleagueB(colleagueB: ColleagueB) {
+        this.colleagueB = colleagueB
+    }
+
+    override fun notify(sender: Colleague, event: String) {
+        when (sender) {
+            is ColleagueA -> colleagueB.handleEvent(event)
+            is ColleagueB -> colleagueA.handleEvent(event)
+        }
+    }
+}
+
+abstract class Colleague(private val mediator: Mediator) {
+    abstract fun sendEvent(event: String)
+
+    abstract fun handleEvent(event: String)
+}
+
+class ColleagueA(mediator: Mediator) : Colleague(mediator) {
+    override fun sendEvent(event: String) {
+        mediator.notify(this, event)
+    }
+
+    override fun handleEvent(event: String) {
+        println("ColleagueA handling event: $event")
+    }
+}
+
+class ColleagueB(mediator: Mediator) : Colleague(mediator) {
+    override fun sendEvent(event: String) {
+        mediator.notify(this, event)
+    }
+
+    override fun handleEvent(event: String) {
+        println("ColleagueB handling event: $event")
+    }
+}
+```
+
+### State
+
+The State pattern allows an object to alter its behavior when its internal state changes. The object will appear to change its class.
+
+```kotlin
+// Example of State in Kotlin
+interface State {
+    fun handleState(context: Context)
+}
+
+class ConcreteStateA : State {
+    override fun handleState(context: Context) {
+        println("Handling state A")
+        context.state = ConcreteStateB()
+    }
+}
+
+class ConcreteStateB : State {
+    override fun handleState(context: Context) {
+        println("Handling state B")
+        context.state = ConcreteStateA()
+    }
+}
+
+class Context(var state: State) {
+    fun request() {
+        state.handleState(this)
+    }
 }
 ```
